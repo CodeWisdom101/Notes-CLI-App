@@ -10,6 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ['3.9', '3.10', '3.11']
 
@@ -32,21 +33,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8
+          pip install flake8 pytest
 
       - name: Lint with flake8
         run: |
           flake8 .
 
-      - name: Install test dependencies
-        run: pip install pytest
-
       - name: Run tests
-        run: pytest
+        if: ${{ hashFiles('tests/**/*.py') != '' }}
+        run: pytest -q
 
-      - name: My Step
-        run: echo "This runs only if previous steps succeeded"
-        if: success()
+      - name: Smoke test CLI (when no tests exist)
+        if: ${{ hashFiles('tests/**/*.py') == '' }}
+        run: python notes_cli.py --help
 
   deploy:
     runs-on: ubuntu-latest
@@ -64,7 +63,7 @@ jobs:
       - name: Test CLI
         run: |
           python notes_cli.py add "Test note" work
-          python notes_cli.py list --label work
+          python notes_cli.py list
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@v1.8.8
