@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
-import json, argparse, os, datetime, sys
+import argparse
+import datetime
+import json
+import os
 
 DATA_FILE = "notes.json"
+
 
 def load_notes():
     if not os.path.exists(DATA_FILE):
@@ -9,9 +13,11 @@ def load_notes():
     with open(DATA_FILE) as f:
         return json.load(f)
 
+
 def save_notes(notes):
     with open(DATA_FILE, "w") as f:
         json.dump(notes, f, indent=2)
+
 
 def list_notes(label="all"):
     notes = load_notes()
@@ -19,6 +25,7 @@ def list_notes(label="all"):
         if label != "all" and n["label"] != label:
             continue
         print(f"{n['created'][:10]} [{n['label']}] {n['text']}")
+
 
 def add_note(text, label):
     notes = load_notes()
@@ -31,11 +38,12 @@ def add_note(text, label):
     )
     save_notes(notes)
 
+
 def main():
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command")
 
-    list_cmd = sub.add_parser("list")
+    sub.add_parser("list")
     # --label will be added by learner
 
     add_cmd = sub.add_parser("add")
@@ -51,6 +59,7 @@ def main():
         add_note(args.note, args.label)
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()
